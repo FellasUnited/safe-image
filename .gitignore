@@ -1,0 +1,18 @@
+/result
+/out
+*.iso
+*.qcow2
+*.img
+.DS_Store
+
+# Emacs
+*~
+\#*\#
+.\#*
+*.elc
+.dir-locals.el
+
+# Cursor
+.cursor/
+.cursorignore
+.cursorules
