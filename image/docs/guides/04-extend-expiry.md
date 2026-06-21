@@ -183,7 +183,7 @@ Publish to keyservers so anyone who verifies your signatures will see
 the new expiry dates:
 
 ```bash
-gpg --keyserver hkps://keyserver.ubuntu.com --send-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com:443 --send-keys "${KEYID}"
 ```
 
 > **You must publish to keyservers every time you extend expiry.**
