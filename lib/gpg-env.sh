@@ -31,10 +31,11 @@ _GPG_ENV_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/yubikey-fetch-pubkey.sh
 source "$_GPG_ENV_DIR/yubikey-fetch-pubkey.sh"
 
-# Keyserver used by the isolated temp home. keys.openpgp.org is reachable over
-# 443 (survives networks that block hkp/11371) and serves key material fine for
-# verification even when it strips unverified UIDs.
-GPG_ENV_TEMP_KEYSERVER="${GPG_ENV_TEMP_KEYSERVER:-hkps://keys.openpgp.org}"
+# Keyserver used by the isolated temp home. keyserver.ubuntu.com is reachable
+# over hkps/443 (survives networks that block hkp/11371) and serves the full key
+# with its UIDs intact, which is what verification needs. It also matches the
+# keyserver the live image ships in dirmngr.conf (modules/yubikey-gpg.nix).
+GPG_ENV_TEMP_KEYSERVER="${GPG_ENV_TEMP_KEYSERVER:-hkps://keyserver.ubuntu.com}"
 
 # Set by gpg_env_prepare; consumed by gpg_env_cleanup.
 GPG_ENV_TEMP_HOME=""
@@ -149,7 +150,7 @@ To make the YubiKey usable for signing, on the host:
   4. Get the PUBLIC key into the keyring (the card holds only the private half):
        ./lib/yubikey-fetch-pubkey.sh                 # card URL, then keyserver
        gpg --import /path/to/your-pubkey.asc         # or from a file
-       gpg --keyserver hkps://keys.openpgp.org --recv-keys <fingerprint>
+       gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys <fingerprint>
      Tip: set a durable URL once so fetch always works:
        gpg --card-edit  ->  admin  ->  url <https-url-to-pubkey>
 

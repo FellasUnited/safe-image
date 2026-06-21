@@ -165,7 +165,7 @@ gpg --import /run/media/$USER/<usb>/KEYID-public.key
 > the revoked subkeys.
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --send-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com --send-keys "${KEYID}"
 ```
 
 Anyone who refreshes your key will see the subkey is revoked.
@@ -241,7 +241,7 @@ gpg --import /run/media/$USER/<usb>/KEYID-public.key
 > others may still encrypt to your compromised key.
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --send-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com --send-keys "${KEYID}"
 ```
 
 After this, anyone who fetches your key will see it is revoked.
