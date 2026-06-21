@@ -79,7 +79,7 @@ You **must** publish your public key to keyservers after:
 - Restoring to a new YubiKey ([06-recovery.md](06-recovery.md))
 
 ```bash
-gpg --keyserver hkps://keyserver.ubuntu.com --send-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com:443 --send-keys "${KEYID}"
 ```
 
 ## Recommended reading order

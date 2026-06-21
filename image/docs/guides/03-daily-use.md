@@ -31,7 +31,7 @@ gpg --import /run/media/$USER/<usb>/KEYID-public.key
 **From a keyserver** (if you already published it):
 
 ```bash
-gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys "${KEYID}"
 ```
 
 **From another machine** (copy the file over any way you like):
@@ -76,7 +76,7 @@ redirect operations to the YubiKey.
 > etc.).
 
 ```bash
-gpg --keyserver hkps://keyserver.ubuntu.com --send-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com:443 --send-keys "${KEYID}"
 ```
 
 `keyserver.ubuntu.com` accepts the upload directly and serves the key with
@@ -235,7 +235,7 @@ gpg --verify document.pdf.asc document.pdf
 If you don't have the signer's key:
 
 ```bash
-gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys <sender-fingerprint>
+gpg --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys <sender-fingerprint>
 gpg --verify document.pdf.asc document.pdf
 ```
 

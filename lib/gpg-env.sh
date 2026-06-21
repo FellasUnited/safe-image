@@ -33,9 +33,13 @@ source "$_GPG_ENV_DIR/yubikey-fetch-pubkey.sh"
 
 # Keyserver used by the isolated temp home. keyserver.ubuntu.com is reachable
 # over hkps/443 (survives networks that block hkp/11371) and serves the full key
-# with its UIDs intact, which is what verification needs. It also matches the
-# keyserver the live image ships in dirmngr.conf (modules/yubikey-gpg.nix).
-GPG_ENV_TEMP_KEYSERVER="${GPG_ENV_TEMP_KEYSERVER:-hkps://keyserver.ubuntu.com}"
+# with its UIDs intact, which is what verification needs.
+#
+# The explicit :443 is required, not cosmetic: without a port, dirmngr does an
+# SRV lookup (_pgpkey-https._tcp.<host>) first, and on networks whose resolver
+# fails SRV queries that aborts every keyserver op ("Server indicated a
+# failure"). An explicit port makes dirmngr skip SRV and connect directly.
+GPG_ENV_TEMP_KEYSERVER="${GPG_ENV_TEMP_KEYSERVER:-hkps://keyserver.ubuntu.com:443}"
 
 # Set by gpg_env_prepare; consumed by gpg_env_cleanup.
 GPG_ENV_TEMP_HOME=""
@@ -150,7 +154,7 @@ To make the YubiKey usable for signing, on the host:
   4. Get the PUBLIC key into the keyring (the card holds only the private half):
        ./lib/yubikey-fetch-pubkey.sh                 # card URL, then keyserver
        gpg --import /path/to/your-pubkey.asc         # or from a file
-       gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys <fingerprint>
+       gpg --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys <fingerprint>
      Tip: set a durable URL once so fetch always works:
        gpg --card-edit  ->  admin  ->  url <https-url-to-pubkey>
 

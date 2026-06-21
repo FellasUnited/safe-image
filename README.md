@@ -285,13 +285,13 @@ typically succeeds even without a URL on the card. If both attempts fail:
 
 ```bash
 gpg --import /path/to/your-pubkey.asc                          # from a file
-gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys <fingerprint>   # try another server
+gpg --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys <fingerprint>   # try another server
 ```
 
 ### Verifying from another machine
 
 ```bash
-gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys <fingerprint>
+gpg --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys <fingerprint>
 gpg --verify out/safe-live-nixos-sway-*.iso.asc
 gpg --verify out/SHA256SUMS.asc
 ```
