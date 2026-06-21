@@ -36,9 +36,9 @@ Mod = Win/Super key
 ## Network
 
 ```bash
-sudo si-netmode offline    # full lockdown
-sudo si-netmode online     # allow outbound
-si-netmode status          # links, routes, firewall state
+sudo safe-netmode offline    # full lockdown
+sudo safe-netmode online     # allow outbound
+safe-netmode status          # links, routes, firewall state
 safe-status                # full system overview
 ```
 
@@ -67,7 +67,7 @@ trust dependency on the host's OS or container daemon.
 ```bash
 # 1. Boot the verified live ISO.
 # 2. Bring up the network and clone the source.
-sudo si-netmode online
+sudo safe-netmode online
 git clone <repo-url> && cd safe-image
 # 3. Build — same Makefile targets as on a normal host.
 make build-no-sign       # or `make build` to sign with your YubiKey
@@ -87,7 +87,7 @@ ykman openpgp info           # OpenPGP applet status
 gpg --card-status            # GPG card info
 
 # Fresh boot — pull your public key from the URL stored on the card.
-# Needs network: run `sudo si-netmode online` first.
+# Needs network: run `sudo safe-netmode online` first.
 safe-yubikey-fetch-pubkey
 ```
 

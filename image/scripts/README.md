@@ -8,5 +8,5 @@ This directory is copied into the live image at:
 /etc/safe-live/scripts/
 ```
 
-Core scripts such as `si-netmode`, `safe-status`, and `safe-docs` are
+Core scripts such as `safe-netmode`, `safe-status`, and `safe-docs` are
 generated declaratively by Nix in `modules/`.

@@ -16,7 +16,7 @@ ISO ships with `nix-command` and `flakes` already enabled, and `nixpkgs`
 resolves through the default flake registry.
 
 ```bash
-sudo si-netmode online
+sudo safe-netmode online
 ```
 
 ## Ephemeral — for "I need this once"

@@ -150,7 +150,7 @@ Replace `/dev/sdX` with your USB device. For full write-back verification see
 │   ├── base.nix            # Base packages, user, autologin, serial console
 │   ├── builder.nix         # Podman + make + git so the image can rebuild itself
 │   ├── sway.nix            # Sway WM, keybindings, fonts, dark mode
-│   ├── netmode.nix         # si-netmode, nftables, polkit, systemd service
+│   ├── netmode.nix         # safe-netmode, nftables, polkit, systemd service
 │   ├── yubikey-gpg.nix     # GPG, YubiKey udev rules, scdaemon PC/SC config
 │   └── docs.nix            # safe-docs command, in-image documentation
 ├── image/
@@ -202,9 +202,9 @@ Toggle from Sway (Mod = Win/Super key):
 Or from the terminal:
 
 ```bash
-sudo si-netmode offline
-sudo si-netmode online
-si-netmode status
+sudo safe-netmode offline
+sudo safe-netmode online
+safe-netmode status
 ```
 
 ## YubiKey & GPG guides

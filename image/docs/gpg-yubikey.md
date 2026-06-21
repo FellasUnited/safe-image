@@ -31,7 +31,7 @@ The live image's home is tmpfs, so the GPG keyring starts empty every
 boot. Re-import the public key:
 
 ```bash
-sudo si-netmode online           # the fetch needs network
+sudo safe-netmode online           # the fetch needs network
 safe-yubikey-fetch-pubkey        # one-shot wrapper around gpg card fetch
 ```
 

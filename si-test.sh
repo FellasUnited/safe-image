@@ -124,7 +124,7 @@ echo "==> Waiting up to ${TIMEOUT}s for boot and offline confirmation..."
 deadline=$(( $(date +%s) + TIMEOUT ))
 while (( $(date +%s) < deadline )); do
   # The login prompt or shell prompt reaching ttyS0 means multi-user.target
-  # completed, which includes si-netmode-default-offline (boots offline).
+  # completed, which includes safe-netmode-default-offline (boots offline).
   if grep -q "safe-live login:\|nixos@safe-live" "$SERIAL_LOG" 2>/dev/null; then
     echo "PASS: safe-live booted and reached login on ttyS0."
     exit 0
