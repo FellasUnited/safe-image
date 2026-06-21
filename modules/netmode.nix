@@ -38,8 +38,8 @@ let
     }
   '';
 
-  siNetmode = pkgs.writeShellApplication {
-    name = "si-netmode";
+  safeNetmode = pkgs.writeShellApplication {
+    name = "safe-netmode";
     runtimeInputs = with pkgs; [
       coreutils
       gawk
@@ -55,7 +55,7 @@ let
       set -euo pipefail
 
       MODE="''${1:-}"
-      STATE_DIR="/run/si-netmode"
+      STATE_DIR="/run/safe-netmode"
       STATE_FILE="$STATE_DIR/state"
 
       list_ifaces() {
@@ -84,7 +84,7 @@ NFT
       }
 
       go_offline() {
-        echo "[si-netmode] Going OFFLINE"
+        echo "[safe-netmode] Going OFFLINE"
 
         apply_offline_firewall
 
@@ -109,7 +109,7 @@ NFT
       }
 
       go_online() {
-        echo "[si-netmode] Going ONLINE"
+        echo "[safe-netmode] Going ONLINE"
 
         apply_online_firewall
 
@@ -149,7 +149,7 @@ NFT
           nft list ruleset || true
           ;;
         *)
-          echo "Usage: si-netmode {offline|online|status}" >&2
+          echo "Usage: safe-netmode {offline|online|status}" >&2
           exit 1
           ;;
       esac
@@ -175,7 +175,7 @@ NFT
 
       echo "== safe live status =="
       echo "hostname: $(hostname)"
-      echo "netmode: $(cat /run/si-netmode/state 2>/dev/null || echo unknown)"
+      echo "netmode: $(cat /run/safe-netmode/state 2>/dev/null || echo unknown)"
 
       echo
       echo "== network services =="
@@ -222,9 +222,9 @@ NFT
 
   safeNetworkOff = pkgs.writeShellApplication {
     name = "safe-network-off";
-    runtimeInputs = with pkgs; [ siNetmode libnotify ];
+    runtimeInputs = with pkgs; [ safeNetmode libnotify ];
     text = ''
-      if sudo -n /run/current-system/sw/bin/si-netmode offline; then
+      if sudo -n /run/current-system/sw/bin/safe-netmode offline; then
         ${_notify "Offline" "All interfaces disabled" "network-offline" "normal"}
       else
         ${_notify "Netmode failed" "Could not go offline" "dialog-error" "critical"}
@@ -234,9 +234,9 @@ NFT
 
   safeNetworkOn = pkgs.writeShellApplication {
     name = "safe-network-on";
-    runtimeInputs = with pkgs; [ siNetmode libnotify ];
+    runtimeInputs = with pkgs; [ safeNetmode libnotify ];
     text = ''
-      if sudo -n /run/current-system/sw/bin/si-netmode online; then
+      if sudo -n /run/current-system/sw/bin/safe-netmode online; then
         ${_notify "Online" "Network enabled" "network-idle" "normal"}
       else
         ${_notify "Netmode failed" "Could not go online" "dialog-error" "critical"}
@@ -245,7 +245,7 @@ NFT
   };
 
   offlineDesktop = pkgs.makeDesktopItem {
-    name = "si-netmode-offline";
+    name = "safe-netmode-offline";
     desktopName = "Go Offline (Disable Network)";
     genericName = "Safe Live Offline Mode";
     comment = "Disable all network interfaces and block traffic";
@@ -256,7 +256,7 @@ NFT
   };
 
   onlineDesktop = pkgs.makeDesktopItem {
-    name = "si-netmode-online";
+    name = "safe-netmode-online";
     desktopName = "Go Online (Enable Network)";
     genericName = "Safe Live Online Mode";
     comment = "Re-enable network interfaces and allow outbound traffic";
@@ -267,17 +267,17 @@ NFT
   };
 
   polkitPolicy = pkgs.stdenvNoCC.mkDerivation {
-    name = "si-netmode-polkit-policy";
+    name = "safe-netmode-polkit-policy";
     dontUnpack = true;
     installPhase = ''
       mkdir -p $out/share/polkit-1/actions
-      cat > $out/share/polkit-1/actions/org.local.si-netmode.policy <<'POLICY'
+      cat > $out/share/polkit-1/actions/org.local.safe-netmode.policy <<'POLICY'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE policyconfig PUBLIC
  "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
-  <action id="org.local.si-netmode">
+  <action id="org.local.safe-netmode">
     <description>Toggle network mode</description>
     <message>Authentication is required to change network mode</message>
     <defaults>
@@ -285,7 +285,7 @@ NFT
       <allow_inactive>auth_admin</allow_inactive>
       <allow_active>yes</allow_active>
     </defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/run/current-system/sw/bin/si-netmode</annotate>
+    <annotate key="org.freedesktop.policykit.exec.path">/run/current-system/sw/bin/safe-netmode</annotate>
     <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
   </action>
 </policyconfig>
@@ -306,7 +306,7 @@ in
   networking.nftables.enable = true;
   networking.nftables.ruleset = lockdownRules;
 
-  systemd.services.si-netmode-default-offline = {
+  systemd.services.safe-netmode-default-offline = {
     description = "Set network mode to offline at boot";
     wantedBy = [ "multi-user.target" ];
     wants = [ "network-pre.target" ];
@@ -315,13 +315,13 @@ in
 
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${siNetmode}/bin/si-netmode offline";
+      ExecStart = "${safeNetmode}/bin/safe-netmode offline";
       RemainAfterExit = true;
     };
   };
 
   environment.systemPackages = [
-    siNetmode
+    safeNetmode
     safeNetworkOff
     safeNetworkOn
     safeStatus

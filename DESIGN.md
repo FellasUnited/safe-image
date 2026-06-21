@@ -157,7 +157,7 @@ flake.nix
         ├── modules/builder.nix      podman + make + git so the live image can
         │                            rebuild safe-image (self-hosting)
         ├── modules/sway.nix         Sway WM, keybindings, fonts, dark mode
-        ├── modules/netmode.nix      si-netmode, nftables, polkit, systemd
+        ├── modules/netmode.nix      safe-netmode, nftables, polkit, systemd
         ├── modules/yubikey-gpg.nix  GPG agent, YubiKey udev rules, scdaemon,
         │                            pcscd, safe-yubikey-fetch-pubkey command
         └── modules/docs.nix         safe-docs (glow TUI + ghostwriter), in-image docs
@@ -183,7 +183,7 @@ BIOS/UEFI
                     │           └── re-apply udev rules to USB devices
                     │               (ensures MODE="0666" on YubiKey in QEMU)
                     │
-                    ├── si-netmode-default-offline.service  (oneshot)
+                    ├── safe-netmode-default-offline.service  (oneshot)
                     │     runs before network-pre.target and NetworkManager
                     │     ├── nftables lockdown table active
                     │     ├── rfkill block all
@@ -211,7 +211,7 @@ which is before NetworkManager, DHCP, or any network service can start.
                     ┌─────────────────────────┐
                     │       BOOT (offline)    │
                     └────────────┬────────────┘
-                                 │ si-netmode-default-offline.service
+                                 │ safe-netmode-default-offline.service
                                  ▼
                     ┌──────────────────────────┐
            ┌──────▶│       OFFLINE            |◀───────┐
@@ -221,7 +221,7 @@ which is before NetworkManager, DHCP, or any network service can start.
            │        │  - routes flushed        │         │
            │        │  - NetworkManager off    │         │
            │        └────────────┬─────────────┘         │
-           │                     │ si-netmode online     │
+           │                     │ safe-netmode online     │
            │                     │ (sudo / polkit)       │
            │                     ▼                       │
            │        ┌──────────────────────────┐         │
@@ -231,12 +231,13 @@ which is before NetworkManager, DHCP, or any network service can start.
            │        │  - interfaces up         │         │
            │        │  - NetworkManager on     │         │
            │        └────────────┬─────────────┘         │
-           │                     │ si-netmode offline    │
+           │                     │ safe-netmode offline    │
            └─────────────────────┘ (sudo / polkit)       │
                                                          │
-                    Sway keybindings:                    │
-                    Mod+Shift+i  →  si-netmode online ───┤
-                    Mod+Shift+o  →  si-netmode offline ──┘
+                    Sway keybindings (wrappers add a desktop │
+                    notification, then call safe-netmode):   │
+                    Mod+Shift+i  →  safe-network-on  ────────┤
+                    Mod+Shift+o  →  safe-network-off ────────┘
 ```
 
 Mode transitions are atomic: the old nftables table is deleted before the new

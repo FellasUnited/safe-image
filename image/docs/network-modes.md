@@ -1,11 +1,11 @@
 # Network modes
 
-This image has two explicit modes managed by `si-netmode`.
+This image has two explicit modes managed by `safe-netmode`.
 
 ## Offline mode
 
 ```bash
-si-netmode offline
+safe-netmode offline
 ```
 
 Expected behavior:
@@ -19,7 +19,7 @@ Expected behavior:
 ## Online mode
 
 ```bash
-si-netmode online
+safe-netmode online
 ```
 
 Expected behavior:
@@ -36,7 +36,7 @@ Use online mode only when you intentionally need connectivity.
 
 ```bash
 safe-status
-si-netmode status
+safe-netmode status
 ```
 
 ## Connecting to Wi-Fi
@@ -45,7 +45,7 @@ The image ships NetworkManager with `wpa_supplicant` as its Wi-Fi backend
 (the default). Go online first; then use `nmcli` or `nmtui`.
 
 ```bash
-si-netmode online                              # unblocks radios, starts NM
+safe-netmode online                              # unblocks radios, starts NM
 nmcli device wifi list                         # scan
 nmcli device wifi connect <SSID> password <PSK>  # join
 ```
@@ -59,7 +59,7 @@ nmtui
 A connection saved by `nmcli` lives in `/etc/NetworkManager/system-connections/`
 and is wiped at reboot — by design for a live image. Re-enter the credentials
 after each boot, or copy a `.nmconnection` file from a USB stick before
-running `si-netmode online`.
+running `safe-netmode online`.
 
 If `nmcli device wifi list` shows no devices:
 
