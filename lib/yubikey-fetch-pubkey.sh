@@ -84,7 +84,7 @@ yubikey_fetch_pubkey() {
   echo "       Recovery options:" >&2
   echo "         1. Import from file:    gpg --import /path/to/pubkey.asc" >&2
   echo "         2. Set URL on card:     gpg --card-edit > admin > url" >&2
-  echo "         3. Try another server:  gpg --keyserver hkps://keys.openpgp.org --recv-keys $key" >&2
+  echo "         3. Try another server:  gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys $key" >&2
   return 1
 }
 

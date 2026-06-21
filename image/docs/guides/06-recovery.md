@@ -178,7 +178,7 @@ gpg --card-status
 Publish the updated key so others reference the new card serial:
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --send-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com --send-keys "${KEYID}"
 ```
 
 ## Factory-reset a YubiKey
@@ -238,7 +238,7 @@ Then, carry the updated public key to your daily machine:
 11. **Publish to keyservers immediately:**
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --send-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com --send-keys "${KEYID}"
 ```
 
 12. Update `~/.ssh/authorized_keys` on any remote hosts

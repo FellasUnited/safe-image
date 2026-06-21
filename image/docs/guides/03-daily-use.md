@@ -31,7 +31,7 @@ gpg --import /run/media/$USER/<usb>/KEYID-public.key
 **From a keyserver** (if you already published it):
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --recv-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "${KEYID}"
 ```
 
 **From another machine** (copy the file over any way you like):
@@ -76,11 +76,14 @@ redirect operations to the YubiKey.
 > etc.).
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --send-keys "${KEYID}"
+gpg --keyserver hkps://keyserver.ubuntu.com --send-keys "${KEYID}"
 ```
 
-`keys.openpgp.org` will send a verification email to the UID address
-on the key.  Confirm it to make the key discoverable by email search.
+`keyserver.ubuntu.com` accepts the upload directly and serves the key with
+its UIDs intact -- no email verification step.  Anyone can then fetch it by
+fingerprint or by searching the UID.  (Note the flip side: this keyserver does
+not verify ownership and does not honor deletion requests, so only publish a
+key you intend to be permanently public.)
 
 ### Configure gpg-agent
 
@@ -232,7 +235,7 @@ gpg --verify document.pdf.asc document.pdf
 If you don't have the signer's key:
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --recv-keys <sender-fingerprint>
+gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys <sender-fingerprint>
 gpg --verify document.pdf.asc document.pdf
 ```
 
