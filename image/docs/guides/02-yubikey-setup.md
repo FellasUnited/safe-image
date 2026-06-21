@@ -76,6 +76,44 @@ gpg/card> login
 gpg/card> quit
 ```
 
+## Set the public-key URL on the card (recommended)
+
+The card holds only your *private* keys.  Tools that need the public half --
+this project's `make sign` / `make verify` and the in-image
+`safe-yubikey-fetch-pubkey` -- run `gpg --card-edit > fetch`, which downloads
+the public key from a **URL stored on the card**.  Setting that URL once makes
+the public key self-bootstrapping on any fresh machine, instead of relying on a
+keyserver lookup.
+
+> Host your ASCII-armored public key somewhere durable and fetchable over HTTPS
+> first -- your own web server, or a raw file URL such as
+> `https://raw.githubusercontent.com/<you>/<repo>/main/pubkey.asc`.
+
+```bash
+gpg --card-edit
+```
+
+```
+gpg/card> admin
+gpg/card> url
+  https://example.com/path/to/your-pubkey.asc
+gpg/card> quit
+```
+
+Verify it was stored:
+
+```bash
+gpg --card-status | grep -i 'URL of public key'
+```
+
+> **`ykman` cannot set this field.**  The OpenPGP "URL of public key" data
+> object is not exposed by any `ykman openpgp` command (verified against ykman
+> 5.9.1 and Yubico's official OpenPGP command reference,
+> <https://docs.yubico.com/software/yubikey/tools/ykman/OpenPGP_Commands.html>).
+> `gpg --card-edit > admin > url` is the only supported way to set it.  If you
+> have nowhere to host the key, leave the URL unset and rely on the keyserver
+> fallback (`keyserver.ubuntu.com`) or import the public key from a file.
+
 ## 3. Move subkeys to YubiKey
 
 ```bash
@@ -164,6 +202,59 @@ ssb>  ed25519/YYYYYYYYYYYYYYYY  ...  [S]
 ssb>  cv25519/ZZZZZZZZZZZZZZZZ  ...  [E]
 ssb>  ed25519/WWWWWWWWWWWWWWWW  ...  [A]
 ```
+
+## Provision additional YubiKeys (optional -- same keys on several cards)
+
+To keep the **same** subkeys on more than one YubiKey (e.g. a daily card and a
+spare in a safe), you cannot simply repeat section 3: `keytocard` *moved* the
+subkey private material onto the first card and left only **stubs** (pointers to
+that card's serial) in this keyring.  A stub cannot be moved, so for **each**
+additional YubiKey you must reset GnuPG and re-import the real private keys from
+your backup.
+
+> **Have your encrypted backup USB ready, and insert the next YubiKey.**
+
+Repeat these steps for every additional card:
+
+1. **Reset the GnuPG environment** so the stubs pointing at the previous card
+   are cleared (otherwise `keytocard` has only stubs to work with):
+
+   ```bash
+   gpgconf --kill all      # release the previous card from gpg-agent/scdaemon
+   rm -rf ~/.gnupg         # this live image wipes it on reboot anyway
+   ```
+
+2. **Re-import the private keys from your backup**, mounting the encrypted
+   backup read-only as in [06-recovery.md](06-recovery.md):
+
+   ```bash
+   sudo cryptsetup open /dev/sdX1 backup
+   sudo mount -o ro /dev/mapper/backup /mnt
+
+   gpg --import /mnt/"${KEYID}-master.key"    # master + subkeys; needed for keytocard
+
+   sudo umount /mnt
+   sudo cryptsetup close backup
+   ```
+
+   > **Do NOT import `${KEYID}-revoke.asc`.**  That file is the *revocation
+   > certificate*.  Importing it marks the key as **revoked** in this keyring,
+   > and every later `keytocard`, export, or publish would then carry the
+   > revocation -- permanently disabling the key for everyone.  Leave it
+   > untouched in your backup; it is only ever imported when you deliberately
+   > retire the key (see [05-revoke-keys.md](05-revoke-keys.md)).
+
+3. **Change the new card's PINs** (section 1) -- every fresh YubiKey ships with
+   the well-known default PINs.
+
+4. **Move the subkeys onto this card** exactly as in section 3 above
+   (`key 1` → `keytocard` → 1, `key 2` → `keytocard` → 2,
+   `key 3` → `keytocard` → 3, then `save`).
+
+5. **Verify** as in section 4 (`gpg --card-status` shows all three slots).
+
+Once every YubiKey is provisioned, continue with the public-key export and the
+cleanup below -- they remove the re-imported private material from this session.
 
 ## 5. Export your public key for daily use
 

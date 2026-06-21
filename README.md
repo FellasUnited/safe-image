@@ -274,20 +274,24 @@ URL-first is the right order: a URL you control (your own server, a
 GitHub raw URL, etc.) is more durable than a public keyserver that may
 hold stale data, go down, or strip identity packets. Set one with
 `gpg --card-edit > admin > url <https-url-to-pubkey>` once and the
-keyserver becomes a fallback rather than the primary path.
+keyserver becomes a fallback rather than the primary path. Note that
+`ykman` cannot set this field — `gpg --card-edit > admin > url` is the
+only supported way. See
+[guides/02-yubikey-setup.md](image/docs/guides/02-yubikey-setup.md) for
+the full step.
 
 If your key was ever uploaded to the configured keyserver, fetch
 typically succeeds even without a URL on the card. If both attempts fail:
 
 ```bash
 gpg --import /path/to/your-pubkey.asc                          # from a file
-gpg --keyserver hkps://keys.openpgp.org --recv-keys <fingerprint>   # try another server
+gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys <fingerprint>   # try another server
 ```
 
 ### Verifying from another machine
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --recv-keys <fingerprint>
+gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys <fingerprint>
 gpg --verify out/safe-live-nixos-sway-*.iso.asc
 gpg --verify out/SHA256SUMS.asc
 ```
