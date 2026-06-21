@@ -31,6 +31,12 @@
   time.timeZone = lib.mkDefault "UTC";
   i18n.defaultLocale = "en_US.UTF-8";
 
+  # NTP time sync. Offline-first: the clock only syncs while online (nftables
+  # drops outbound traffic in offline mode). Correct dates matter for GPG key
+  # creation and expiry timestamps — the in-image key guides sync time in a
+  # brief online window before generating or renewing keys.
+  services.timesyncd.enable = lib.mkDefault true;
+
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   environment.systemPackages = with pkgs; [

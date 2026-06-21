@@ -17,6 +17,18 @@ so it must be done on the air-gapped safe-image.
 
 ## Before you begin
 
+The new expiry you set is recorded against the current system clock, so make
+sure the time is correct first.  Sync it over NTP in a brief online window,
+then return offline:
+
+```bash
+sudo safe-netmode online           # brief online window for NTP only
+sudo timedatectl set-ntp true
+timedatectl status               # wait for: System clock synchronized: yes
+date -u                          # sanity-check the date/time (UTC)
+sudo safe-netmode offline          # disable the network again
+```
+
 > **STOP -- Verify you are offline.**
 >
 > ```bash

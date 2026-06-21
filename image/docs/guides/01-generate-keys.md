@@ -17,19 +17,46 @@ encryption, and authentication.
 
 ## Before you begin
 
-> **STOP -- Verify you are offline.**
+### Set the correct system time (briefly online, then offline)
+
+GPG records creation and expiry timestamps **inside** the key material, so the
+system clock must be correct *before* you generate anything.  The live image is
+amnesic and may boot with a wrong clock.  Sync it over NTP in a short online
+window, then return offline to do all key work:
+
+```bash
+sudo safe-netmode online           # brief online window for NTP only
+sudo timedatectl set-ntp true    # enable NTP synchronization
+timedatectl status               # wait for: System clock synchronized: yes
+date -u                          # sanity-check the date/time (UTC)
+sudo safe-netmode offline          # disable the network again
+```
+
+> **STOP -- Verify you are offline before continuing.**
 >
 > ```bash
 > ip link | grep 'state UP'
 > ```
 >
-> No interfaces should be UP.  If any are, run `sudo si-netmode offline`.
+> No interfaces should be UP.  If any are, run `sudo safe-netmode offline`.
 
 ## 1. Create the master key (certify only)
 
 The master key only certifies subkeys -- it does not sign, encrypt, or
 authenticate.  It will be backed up offline and never stored on the
 YubiKey.
+
+First, generate a strong random passphrase for the master (certify) key.  This
+emits 36 bytes of randomness, base64-armored (~48 characters) -- far stronger
+than anything you would invent:
+
+```bash
+gpg --gen-random --armor 1 36
+```
+
+Record the output in your offline backup (write it down / store it on the
+encrypted backup USB).  It is the only thing protecting your certify key, and
+you will paste it when GPG prompts for a passphrase below.
 
 ```bash
 gpg --expert --full-gen-key
@@ -44,7 +71,8 @@ When prompted:
 3. Select **Curve 25519** (option 1)
 4. Set expiry to **0 (does not expire)** -- subkeys will expire instead
 5. Enter your real name and email
-6. Set a strong passphrase (you will only need it when certifying)
+6. Paste the random passphrase you generated above (you will only need it
+   when certifying)
 
 Note your key ID:
 
