@@ -25,6 +25,20 @@ ykman openpgp info
 gpg --card-status
 ```
 
+## KDF (PIN hashing)
+
+KDF (Key Derived Function) makes `gpg` hash the PIN on the host before
+sending it to the card, so the PIN is never transmitted over PC/SC or stored
+on the card in clear text. It is enabled per card with
+`gpg --card-edit > admin > kdf-setup` and shows up in `gpg --card-status` as
+`KDF setting ......: on`.
+
+It **must be turned on while the card is empty** — once subkeys are loaded
+(`keytocard`) the setting is locked and changing it returns
+`Conditions of use not satisfied`, recoverable only by a full
+`ykman openpgp reset`. Provisioning enables it as the first step; see
+[guides/02-yubikey-setup.md](guides/02-yubikey-setup.md#1-enable-kdf-then-change-the-yubikey-pins).
+
 ## Bootstrap the keyring on a fresh boot
 
 The live image's home is tmpfs, so the GPG keyring starts empty every
