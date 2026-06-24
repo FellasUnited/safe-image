@@ -206,6 +206,52 @@ ssh -T git@github.com
 The YubiKey will prompt for your User PIN on the first SSH connection
 in a session.
 
+#### Restrict which keys gpg-agent offers over SSH (optional)
+
+By default `gpg-agent` offers *every* authentication-capable key it can
+reach.  If you keep extra on-disk keys (for example an old SSH key or a
+second identity), you may want SSH to use only your YubiKey's `[A]`
+subkey.
+
+First find the keygrip of the authentication subkey:
+
+```bash
+gpg --list-secret-keys --with-keygrip "${KEYID}"
+```
+
+Each key/subkey is followed by a `Keygrip = ...` line.  Copy the one
+under the `[A]` (authenticate) subkey:
+
+```
+ssb   ed25519/WWWWWWWWWWWWWWWW  ...  [A]
+      Keygrip = 1234ABCD....................0000
+```
+
+List **only** that keygrip in `sshcontrol`:
+
+```bash
+echo "1234ABCD....................0000" > ~/.gnupg/sshcontrol
+gpgconf --kill gpg-agent
+ssh-add -L   # should now list just the one ssh-ed25519 key
+```
+
+> **Caveat -- plugged-in cards are always offered.**  A YubiKey
+> (or any active card/token) is presented to SSH *regardless* of
+> `sshcontrol`, ordered by serial number.  So `sshcontrol` restricts
+> on-disk keys, not the card itself.  If you carry more than one
+> YubiKey, unplug the ones you don't want offered.
+>
+> **Note -- `sshcontrol` is deprecated.**  Recent GnuPG (2.4+) prefers
+> a per-key `Use-for-ssh` attribute over the `sshcontrol` file.  Set it
+> with:
+>
+> ```bash
+> gpg-connect-agent 'KEYATTR <keygrip> Use-for-ssh: yes' /bye
+> ```
+>
+> Both mechanisms work; `sshcontrol` remains the simplest if you only
+> have a single auth key.
+
 ## Signing
 
 ### Sign a file
