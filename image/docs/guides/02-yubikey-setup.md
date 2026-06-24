@@ -29,11 +29,70 @@ Move GPG subkeys onto a YubiKey and configure it for use.
 > your subkey private material will be on the YubiKey.  If the card
 > breaks, you lose those keys permanently.
 
-## 1. Change YubiKey PINs
+## 1. Enable KDF, then change the YubiKey PINs
 
-The default PINs are well-known and must be changed immediately.
+Two things happen here, **in this order**, while the card is still empty:
+turn on KDF, then change the default PINs.  Both must be done before any
+subkey is moved onto the card in section 3.
+
+### Enable KDF first (do this before anything else)
+
+**KDF (Key Derived Function)** makes GnuPG hash your PIN on the host
+*before* sending it to the card, so the PIN never travels over the
+USB/PC-SC link or gets stored on the card in clear text.  Only the hash
+is transmitted and stored.  Without KDF, anyone able to observe the link
+to the reader (or a malicious reader) sees your PIN in plain text.
+
+> **KDF can only be enabled on an empty card, and it must be turned on
+> first.**
+>
+> The KDF setting can only be changed while the OpenPGP applet holds no
+> keys.  Once you have run `keytocard` (section 3), any attempt to change
+> it fails with:
+>
+> ```
+> gpg: error for setup KDF: Conditions of use not satisfied
+> ```
+>
+> Recovering from that means factory-resetting the OpenPGP applet
+> (`ykman openpgp reset`), which **wipes the keys and the PINs** and
+> forces you to redo this whole guide.  So enable KDF now, before the
+> PIN change and before `keytocard`.
+
+Requires YubiKey firmware 5.2.3+ (OpenPGP 3.4) and GnuPG 2.2.1+ -- both
+are satisfied by the prerequisites above.
 
 > **Insert your YubiKey now.**
+
+```bash
+gpg --card-edit
+```
+
+```
+gpg/card> admin
+gpg/card> kdf-setup
+  (enter the Admin PIN -- default 12345678)
+```
+
+Confirm it took:
+
+```bash
+gpg --card-status | grep -i 'KDF setting'
+```
+
+```
+KDF setting ......: on
+```
+
+> Enabling KDF re-hashes the PINs the card currently holds, so do it
+> *before* you set your own PINs -- otherwise the change below has to be
+> the first time the new hash format is written anyway.  Setting KDF first
+> and changing PINs second (next step) is the clean order.
+
+### Change the PINs
+
+The default PINs are well-known and must be changed immediately.  Stay in
+(or re-enter) `gpg --card-edit`:
 
 ```bash
 gpg --card-edit
@@ -244,8 +303,10 @@ Repeat these steps for every additional card:
    > untouched in your backup; it is only ever imported when you deliberately
    > retire the key (see [05-revoke-keys.md](05-revoke-keys.md)).
 
-3. **Change the new card's PINs** (section 1) -- every fresh YubiKey ships with
-   the well-known default PINs.
+3. **Enable KDF and change the new card's PINs** (section 1) -- every fresh
+   YubiKey ships with KDF off and the well-known default PINs.  KDF must be
+   enabled now, before step 4, because it cannot be changed once subkeys are on
+   the card.
 
 4. **Move the subkeys onto this card** exactly as in section 3 above
    (`key 1` → `keytocard` → 1, `key 2` → `keytocard` → 2,

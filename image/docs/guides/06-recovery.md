@@ -111,7 +111,8 @@ gpg> quit
 
 Follow [02-yubikey-setup.md](02-yubikey-setup.md):
 
-1. Change PINs (step 1)
+1. Enable KDF and change PINs (step 1) -- KDF must be turned on while the
+   card is still empty, before `keytocard`
 2. Move subkeys to card with `keytocard` (step 3)
 3. Remove master key from the keyring (step 5)
 
