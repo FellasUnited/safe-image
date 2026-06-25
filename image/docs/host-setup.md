@@ -153,7 +153,7 @@ gpg-agent.conf including SSH support, cache TTL, and pinentry selection.
 ## 4. Shell profile
 
 The GPG environment and YubiKey touch notifications are set up together in
-`~/.bashrc.d/gpg-yubikey.bash` (see section 8a-ii). If you prefer a single
+`~/.bashrc.d/gpg-yubikey.bash`. If you prefer a single
 `~/.bashrc`, add the following directly to it instead:
 
 ```bash
@@ -392,125 +392,6 @@ ls "$XDG_RUNTIME_DIR/yubikey-touch-detector.socket"
 
 From this point on, any time an operation is waiting for a touch (LED blinking),
 a desktop notification appears: **"YubiKey is waiting for touch"**.
-
-### 8a-ii. CLI notifications (same terminal)
-
-Desktop notifications appear regardless of which terminal triggered the
-operation. To also print a message in the triggering terminal, place the
-following in `~/.bashrc.d/gpg-yubikey.bash` (sourced automatically if
-`~/.bashrc` contains the standard `~/.bashrc.d/` loader). It requires `socat`
-(`sudo dnf install socat`).
-
-The file should also contain the GPG environment setup so the whole YubiKey
-configuration lives in one place:
-
-```bash
-mkdir -p ~/.bashrc.d
-cat > ~/.bashrc.d/gpg-yubikey.bash << 'EOF'
-# GPG agent and YubiKey touch notifications
-
-# Restore gpg-agent + YubiKey to a working state for the current terminal.
-# Called automatically at shell startup; safe to call manually any time things
-# break — after killing the agent, a KVM switch, card removal, or pcscd hiccup.
-gpg-restore() {
-    gpgconf --kill scdaemon 2>/dev/null
-
-    if ! gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1; then
-        gpgconf --kill gpg-agent 2>/dev/null
-        gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
-    fi
-
-    export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-
-    # Update TTY record for pinentry-notify (gpg-agent has no controlling
-    # terminal so it cannot read $GPG_TTY directly).
-    printf '%s' "$GPG_TTY" > "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ytd-active-tty"
-
-    if gpg --card-status >/dev/null 2>&1; then
-        echo "🟢 GPG + YubiKey: OK"
-    else
-        echo "❌ Card not accessible — if the above didn't help, try:"
-        echo "   sudo systemctl restart pcscd.service && gpg-restore"
-    fi
-}
-
-export GPG_TTY="$(tty)"
-gpg-restore >/dev/null  # silent on normal startup; errors still propagate
-
-# yubikey-touch-detector: notify current terminal when touch is needed
-#
-# GPG_1 is emitted only when the card is blocked on PKSIGN waiting for touch
-# (the detector sends LEARN via assuan; LEARN blocks on a busy card and the
-# 400 ms timer fires → GPG_1). The pinentry wrapper re-opens the key stubs
-# after PIN entry so the detector re-runs at the right moment. By the time
-# GPG_1 arrives here, pinentry has already exited — no pinentry handling needed.
-# if tty -s && command -v socat >/dev/null 2>&1; then
-#     _ytd_socket="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/yubikey-touch-detector.socket"
-#     _ytd_warn=$(tput setaf 3 2>/dev/null)
-#     _ytd_ok=$(tput bold 2>/dev/null)
-#     _ytd_rst=$(tput sgr0 2>/dev/null)
-#     _ytd_cmds='gpg2?|gpgsm|gpgtar|ssh|scp|sftp|rsync|git|pass|age|sops'
-#     (socat -u UNIX-CONNECT:"$_ytd_socket",retry=15,interval=1 - 2>/dev/null | \
-#         while IFS= read -r -d '' -n5 msg; do
-#             case "$msg" in
-#                 *_1)
-#                     _ytd_mine=0
-#                     _ytd_i=0
-#                     while [ "$_ytd_i" -lt 10 ]; do
-#                         if ps -t "${GPG_TTY#/dev/}" -o comm= 2>/dev/null \
-#                                 | grep -qE "^($_ytd_cmds)$"; then
-#                             _ytd_mine=1
-#                             break
-#                         fi
-#                         sleep 0.1
-#                         _ytd_i=$((_ytd_i + 1))
-#                     done
-#                     [ "$_ytd_mine" = 1 ] || continue
-#                     printf '\r%s🛡️  Touch YubiKey now%s\n' \
-#                         "$_ytd_warn" "$_ytd_rst" >/dev/tty 2>/dev/null ;;
-#                 *_0)
-#                     if [ "${_ytd_mine:-0}" = 1 ]; then
-#                         _ytd_mine=0
-#                         printf '\r%s🟢 YubiKey: done%s\n' \
-#                             "$_ytd_ok" "$_ytd_rst" >/dev/tty 2>/dev/null
-#                     fi ;;
-#             esac
-#         done) &
-#     disown %% 2>/dev/null
-#     unset _ytd_socket _ytd_warn _ytd_ok _ytd_rst _ytd_cmds
-# fi
-EOF
-```
-
-If your `~/.bashrc` does not already source `~/.bashrc.d/`, add:
-
-```bash
-if [ -d ~/.bashrc.d ]; then
-    for rc in ~/.bashrc.d/*; do
-        [ -f "$rc" ] && . "$rc"
-    done
-    unset rc
-fi
-```
-
-Key points:
-- `socat -u` — unidirectional (socket → stdout only); without `-u`, socat also reads
-  stdin and gets **SIGTTIN** in the background, silently stopping the process.
-- `_ytd_cmds` — regex of all commands that route through gpg-agent. Extend as needed.
-- `GPG_TTY` — set at shell startup via `export GPG_TTY="$(tty)"`. The ownership check
-  uses `ps -t "${GPG_TTY#/dev/}"` to confirm a triggering command is running on *this*
-  terminal. All other terminals skip the event silently.
-- Ownership poll — waits up to 1 s for the triggering process to appear (there is a
-  brief window between when the key stub is opened and when the process is visible in
-  `ps`).
-- No pinentry handling — `GPG_1` is emitted only when the card is actually blocking on
-  touch, never during PIN entry. The pinentry wrapper (section 8b) ensures a fresh
-  `GPG_1` fires after pinentry exits, so by the time this code runs, pinentry is gone.
-- `_ytd_mine` — tracks whether this terminal showed a start notification so the done
-  message pairs correctly after the triggering process exits.
-- `tput setaf`/`sgr0` — reads terminal capabilities at runtime; no hardcoded escapes.
-- Socket messages are fixed 5 bytes: `GPG_1`/`GPG_0` (gpg), `U2F_1`/`U2F_0`
-  (FIDO2), `MAC_1`/`MAC_0` (HMAC-secret).
 
 ### 8b. Pinentry wrapper (re-triggering touch detection after PIN entry)
 
