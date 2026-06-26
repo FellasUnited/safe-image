@@ -45,7 +45,7 @@ The live image's home is tmpfs, so the GPG keyring starts empty every
 boot. Re-import the public key:
 
 ```bash
-sudo safe-netmode online           # the fetch needs network
+sudo safe-netmode online         # the fetch needs network
 safe-yubikey-fetch-pubkey        # one-shot wrapper around gpg card fetch
 ```
 
@@ -56,7 +56,7 @@ attempts in order:
    the card. Used if set.
 2. **Keyserver lookup by fingerprint** — used when no URL is set. Pulls
    from whichever keyserver is configured in `/etc/gnupg/dirmngr.conf`.
-   This image ships `hkp://keyserver.ubuntu.com:80`.
+   This image ships `hkps://keyserver.ubuntu.com:443`.
 
 So even with no URL on the card, the fetch succeeds if your key was
 uploaded to that keyserver. The same helper runs automatically inside
