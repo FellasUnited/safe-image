@@ -45,7 +45,7 @@ nix build .#nixosConfigurations.safe-live.config.system.build.isoImage \
   --out-link /tmp/result --no-warn-dirty -L
 ```
 
-`-L` (keep-going + verbose) prints each builder's output live, which is useful
+`-L` (`--print-build-logs`) prints each builder's output live, which is useful
 when you want to watch the failure in real time rather than retrieve it after
 the fact.
 
