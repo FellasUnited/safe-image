@@ -33,7 +33,7 @@ Move GPG subkeys onto a YubiKey and configure it for use.
 
 Two things happen here, **in this order**, while the card is still empty:
 turn on KDF, then change the default PINs.  Both must be done before any
-subkey is moved onto the card in section 3.
+subkey is moved onto the card in section 4.
 
 ### Enable KDF first (do this before anything else)
 
@@ -47,7 +47,7 @@ to the reader (or a malicious reader) sees your PIN in plain text.
 > first.**
 >
 > The KDF setting can only be changed while the OpenPGP applet holds no
-> keys.  Once you have run `keytocard` (section 3), any attempt to change
+> keys.  Once you have run `keytocard` (section 4), any attempt to change
 > it fails with:
 >
 > ```
@@ -135,7 +135,7 @@ gpg/card> login
 gpg/card> quit
 ```
 
-## Set the public-key URL on the card (recommended)
+## 3. Set the public-key URL on the card (recommended)
 
 The card holds only your *private* keys.  Tools that need the public half --
 this project's `make sign` / `make verify` and the in-image
@@ -173,7 +173,7 @@ gpg --card-status | grep -i 'URL of public key'
 > have nowhere to host the key, leave the URL unset and rely on the keyserver
 > fallback (`keyserver.ubuntu.com`) or import the public key from a file.
 
-## 3. Move subkeys to YubiKey
+## 4. Move subkeys to YubiKey
 
 ```bash
 gpg --edit-key "${KEYID}"
@@ -235,7 +235,7 @@ Select **3 - Authentication key**.
 gpg> save
 ```
 
-## 4. Verify
+## 5. Verify
 
 ```bash
 gpg --card-status
@@ -262,10 +262,10 @@ ssb>  cv25519/ZZZZZZZZZZZZZZZZ  ...  [E]
 ssb>  ed25519/WWWWWWWWWWWWWWWW  ...  [A]
 ```
 
-## Provision additional YubiKeys (optional -- same keys on several cards)
+## 6. Provision additional YubiKeys (optional -- same keys on several cards)
 
 To keep the **same** subkeys on more than one YubiKey (e.g. a daily card and a
-spare in a safe), you cannot simply repeat section 3: `keytocard` *moved* the
+spare in a safe), you cannot simply repeat section 4: `keytocard` *moved* the
 subkey private material onto the first card and left only **stubs** (pointers to
 that card's serial) in this keyring.  A stub cannot be moved, so for **each**
 additional YubiKey you must reset GnuPG and re-import the real private keys from
@@ -308,16 +308,16 @@ Repeat these steps for every additional card:
    enabled now, before step 4, because it cannot be changed once subkeys are on
    the card.
 
-4. **Move the subkeys onto this card** exactly as in section 3 above
+4. **Move the subkeys onto this card** exactly as in section 4 above
    (`key 1` → `keytocard` → 1, `key 2` → `keytocard` → 2,
    `key 3` → `keytocard` → 3, then `save`).
 
-5. **Verify** as in section 4 (`gpg --card-status` shows all three slots).
+5. **Verify** as in section 5 (`gpg --card-status` shows all three slots).
 
 Once every YubiKey is provisioned, continue with the public-key export and the
 cleanup below -- they remove the re-imported private material from this session.
 
-## 5. Export your public key for daily use
+## 7. Export your public key for daily use
 
 Save the public key so you can carry it to other machines:
 
@@ -335,7 +335,7 @@ sync
 
 > **Remove the USB stick.**
 
-## 6. Clean up the safe-image
+## 8. Clean up the safe-image
 
 After `keytocard`, the safe-image keyring contains material that
 must be removed before you finish:
