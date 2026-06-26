@@ -46,7 +46,7 @@ The image ships NetworkManager with `wpa_supplicant` as its Wi-Fi backend
 
 ```bash
 safe-netmode online                              # unblocks radios, starts NM
-nmcli device wifi list                         # scan
+nmcli device wifi list                           # scan
 nmcli device wifi connect <SSID> password <PSK>  # join
 ```
 

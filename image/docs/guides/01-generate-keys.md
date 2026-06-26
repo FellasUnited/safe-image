@@ -26,9 +26,9 @@ window, then return offline to do all key work:
 
 ```bash
 sudo safe-netmode online           # brief online window for NTP only
-sudo timedatectl set-ntp true    # enable NTP synchronization
-timedatectl status               # wait for: System clock synchronized: yes
-date -u                          # sanity-check the date/time (UTC)
+sudo timedatectl set-ntp true      # enable NTP synchronization
+timedatectl status                 # wait for: System clock synchronized: yes
+date -u                            # sanity-check the date/time (UTC)
 sudo safe-netmode offline          # disable the network again
 ```
 

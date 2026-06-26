@@ -99,7 +99,7 @@ non-Fedora host.
 │         │  cp ISO → /out/                                   │   │   │
 │         │  sha256sum → /out/SHA256SUMS                      │   │   │
 │         └───────────────────────────────────────────────────┘   │   │
-│          └──────────────────────────────────────────────────┘   │   │
+│         └───────────────────────────────────────────────────────┘   │
 │                                                                     │
 │    ├─[signing]─ si-sign-outputs.sh --no-smoke                       │
 │    │              └── gpg --detach-sign ISO + SHA256SUMS            │
@@ -208,32 +208,32 @@ which is before NetworkManager, DHCP, or any network service can start.
 ## Network mode state machine
 
 ```
-                    ┌─────────────────────────┐
-                    │       BOOT (offline)    │
-                    └────────────┬────────────┘
+                    ┌──────────────────────────┐
+                    │      BOOT (offline)      │
+                    └────────────┬─────────────┘
                                  │ safe-netmode-default-offline.service
                                  ▼
                     ┌──────────────────────────┐
-           ┌──────▶│       OFFLINE            |◀───────┐
-           │        │  - nftables lockdown     │         │
-           │        │  - rfkill block all      │         │
-           │        │  - interfaces down       │         │
-           │        │  - routes flushed        │         │
-           │        │  - NetworkManager off    │         │
-           │        └────────────┬─────────────┘         │
-           │                     │ safe-netmode online     │
-           │                     │ (sudo / polkit)       │
-           │                     ▼                       │
-           │        ┌──────────────────────────┐         │
-           │        │       ONLINE             │         │
-           │        │  - nftables: outbound ok │         │
-           │        │  - rfkill unblock all    │         │
-           │        │  - interfaces up         │         │
-           │        │  - NetworkManager on     │         │
-           │        └────────────┬─────────────┘         │
-           │                     │ safe-netmode offline    │
-           └─────────────────────┘ (sudo / polkit)       │
-                                                         │
+           ┌───────▶│         OFFLINE          │◀────────────┐
+           │        │  - nftables lockdown     │             │
+           │        │  - rfkill block all      │             │
+           │        │  - interfaces down       │             │
+           │        │  - routes flushed        │             │
+           │        │  - NetworkManager off    │             │
+           │        └────────────┬─────────────┘             │
+           │                     │ safe-netmode online       │
+           │                     │ (sudo / polkit)           │
+           │                     ▼                           │
+           │        ┌──────────────────────────┐             │
+           │        │          ONLINE          │             │
+           │        │  - nftables: outbound ok │             │
+           │        │  - rfkill unblock all    │             │
+           │        │  - interfaces up         │             │
+           │        │  - NetworkManager on     │             │
+           │        └────────────┬─────────────┘             │
+           │                     │ safe-netmode offline      │
+           └─────────────────────┘ (sudo / polkit)           │
+                                                             │
                     Sway keybindings (wrappers add a desktop │
                     notification, then call safe-netmode):   │
                     Mod+Shift+i  →  safe-network-on  ────────┤

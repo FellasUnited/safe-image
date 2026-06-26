@@ -26,7 +26,7 @@ is registered in any profile; exit the shell and the package is unused
 (though its store paths linger until the next `nix-collect-garbage`).
 
 ```bash
-nix shell nixpkgs#htop                  # interactive
+nix shell nixpkgs#htop                                    # interactive
 nix shell nixpkgs#imagemagick -c convert in.png out.jpg   # one-shot
 ```
 

@@ -39,7 +39,7 @@ Mod = Win/Super key
 sudo safe-netmode offline    # full lockdown
 sudo safe-netmode online     # allow outbound
 safe-netmode status          # links, routes, firewall state
-safe-status                # full system overview
+safe-status                  # full system overview
 ```
 
 Boots offline. Online mode allows outbound traffic and starts NetworkManager.
