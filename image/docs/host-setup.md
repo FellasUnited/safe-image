@@ -428,7 +428,6 @@ fi
 
 /usr/bin/pinentry-curses "$@"
 _ret=$?
-rm -f "${_active}"
 
 # Re-trigger: sleep 100 ms (gpg-agent forwarding PIN to scdaemon), then open
 # the shadowed key stubs so yubikey-touch-detector fires a new LEARN probe.
@@ -436,11 +435,11 @@ sleep 0.1
 _keys="${GNUPGHOME:-$HOME/.gnupg}/private-keys-v1.d"
 if [ -d "$_keys" ]; then
     for _f in "$_keys"/*.key; do
-        [ -f "$_f" ] && grep -qlF 'shadowed-private-key' "$_f" \
+        [ -f "$_f" ] && grep -qF 'shadowed-private-key' "$_f" \
             && cat "$_f" >/dev/null 2>&1
     done
 fi
-unset _dir _active _keys _f
+unset _dir _keys _f
 
 exit "${_ret}"
 EOF
@@ -472,13 +471,13 @@ Wire it up in `~/.gnupg/gpg-agent.conf`:
 ```bash
 grep -v '^pinentry-program' ~/.gnupg/gpg-agent.conf > /tmp/gac \
     && mv /tmp/gac ~/.gnupg/gpg-agent.conf
-echo 'pinentry-program /home/gg/.local/bin/pinentry-notify' >> ~/.gnupg/gpg-agent.conf
+echo "pinentry-program $HOME/.local/bin/pinentry-notify" >> ~/.gnupg/gpg-agent.conf
 gpgconf --kill gpg-agent
 ```
 
-> Replace `/home/gg` with your actual home directory, or use `$HOME` if your
-> shell expands it — gpg-agent reads the value literally, so tilde (`~`) is
-> not expanded.
+> `$HOME` is expanded when the line is written, so the file ends up with an
+> absolute path. Do not put a literal `~` in `gpg-agent.conf` — gpg-agent reads
+> the value literally and does not expand tilde.
 
 ---
 
