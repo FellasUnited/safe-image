@@ -131,7 +131,7 @@ Replace `/dev/sdX` with your target USB device — verify with `lsblk` first.
 ### Verify the write
 
 ```bash
-ISO="out/safe-live-nixos-sway-$(ls out/*.iso | head -1 | grep -oP '\K[^/]+(?=\.iso)').iso"
+ISO=$(ls out/*.iso | head -1)
 ISO_SIZE=$(stat -c%s "$ISO")
 sudo dd if=/dev/sdX bs=4M status=none \
     | head -c "${ISO_SIZE}" \
