@@ -52,9 +52,17 @@ sudo cryptsetup close backup
 
 > **Remove the BACKUP USB now.**
 
-## Revoke a subkey
+Set `KEYID` for the rest of this guide (the live image is amnesic, so it is
+unset on a fresh boot):
 
-### 2. Select and revoke
+```bash
+export KEYID=$(gpg --list-keys --with-colons | awk -F: '/^fpr/ { print $10; exit }')
+echo "$KEYID"   # should print your 40-char fingerprint
+```
+
+## 2. Revoke a subkey
+
+### Select and revoke
 
 ```bash
 gpg --edit-key "${KEYID}"
@@ -93,13 +101,13 @@ Repeat for other subkeys if needed (`key 2`, `key 3`).
 gpg> save
 ```
 
-### 3. Export the updated public key
+## 3. Export the updated public key
 
 ```bash
 gpg --armor --export "${KEYID}" > "${KEYID}-public.key"
 ```
 
-### 4. Remove master key from this session
+## 4. Remove master key from this session
 
 ```bash
 gpg --delete-secret-keys "${KEYID}"
@@ -107,13 +115,13 @@ gpg --delete-secret-keys "${KEYID}"
 gpg --card-status
 ```
 
-### 5. Create replacement subkeys (if needed)
+## 5. Create replacement subkeys (if needed)
 
 Follow [01-generate-keys.md](01-generate-keys.md) step 2 to add new
 subkeys (you will need to import the master key again), then
 [02-yubikey-setup.md](02-yubikey-setup.md) to move them to the YubiKey.
 
-### 6. Update your backups
+## 6. Update your backups
 
 > **Insert your PRIMARY backup USB now.**
 
@@ -145,7 +153,7 @@ sudo cryptsetup close backup
 
 > **Remove the DUPLICATE backup USB now.**
 
-### 7. Distribute the revocation
+## 7. Distribute the revocation
 
 > **STOP -- You are about to leave the air-gapped environment.**
 >
@@ -192,6 +200,7 @@ If you created a revocation certificate during key generation:
 sudo cryptsetup open /dev/sdX1 backup
 sudo mount -o ro /dev/mapper/backup /mnt
 
+gpg --import /mnt/KEYID-public.key     # the revocation needs the key present
 gpg --import /mnt/KEYID-revoke.asc
 
 sudo umount /mnt
@@ -199,6 +208,12 @@ sudo cryptsetup close backup
 ```
 
 > **Remove the BACKUP USB now.**
+
+Set `KEYID` (the live image is amnesic, so it is unset on a fresh boot):
+
+```bash
+export KEYID=$(gpg --list-keys --with-colons | awk -F: '/^fpr/ { print $10; exit }')
+```
 
 ### Option B: Generate a new revocation certificate
 
@@ -219,6 +234,7 @@ sudo cryptsetup close backup
 > **Remove the BACKUP USB now.**
 
 ```bash
+export KEYID=$(gpg --list-keys --with-colons | awk -F: '/^fpr/ { print $10; exit }')
 gpg --output "${KEYID}-revoke.asc" --gen-revoke "${KEYID}"
 gpg --import "${KEYID}-revoke.asc"
 ```

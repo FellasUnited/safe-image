@@ -24,8 +24,8 @@ then return offline:
 ```bash
 sudo safe-netmode online           # brief online window for NTP only
 sudo timedatectl set-ntp true
-timedatectl status               # wait for: System clock synchronized: yes
-date -u                          # sanity-check the date/time (UTC)
+timedatectl status                 # wait for: System clock synchronized: yes
+date -u                            # sanity-check the date/time (UTC)
 sudo safe-netmode offline          # disable the network again
 ```
 
@@ -54,6 +54,14 @@ sudo cryptsetup close backup
 
 > **Remove the BACKUP USB now.**
 
+Set `KEYID` for the rest of this guide (the live image is amnesic, so it is
+unset on a fresh boot):
+
+```bash
+export KEYID=$(gpg --list-keys --with-colons | awk -F: '/^fpr/ { print $10; exit }')
+echo "$KEYID"   # should print your 40-char fingerprint
+```
+
 ## 2. Check current expiry
 
 ```bash
@@ -62,29 +70,29 @@ gpg --list-keys --keyid-format long "${KEYID}"
 
 Note which subkeys are near expiry.
 
-## 3. Extend each subkey
+## 3. Extend the subkeys
 
 ```bash
 gpg --edit-key "${KEYID}"
 ```
 
-### Select and extend each subkey
+### Select all subkeys, then extend them together
 
-```
-gpg> key 1
-gpg> expire
-```
-
-Enter the new expiry period (e.g. `1y` for one year from today).
-Enter your master key passphrase when prompted.
+`key N` *toggles* selection, so select all three subkeys first — each one gets
+a `*` — then run `expire` once to set the same new date on all of them:
 
 ```
 gpg> key 1
 gpg> key 2
+gpg> key 3
 gpg> expire
 ```
 
-Repeat for each subkey (`key 1`, `key 2`, `key 3`).
+Enter the new expiry period (e.g. `1y` for one year from today), then your
+master key passphrase when prompted.
+
+> To extend only some subkeys, select just those (e.g. `key 1` then `expire`).
+> Run `key N` again to deselect it before selecting a different one.
 
 ```
 gpg> save

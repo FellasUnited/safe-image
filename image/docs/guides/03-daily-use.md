@@ -14,6 +14,11 @@ These steps apply to **every** machine where you want to use the
 YubiKey -- your first daily workstation, a second laptop, a work
 machine, etc.  Repeat them on each new system.
 
+> On a Fedora workstation, do the one-time **system** setup first --
+> packages, `pcscd`, scdaemon `disable-ccid`, udev re-detection rules, and
+> touch notifications -- from [host-setup.md](../host-setup.md). The steps
+> below are the per-user GPG/SSH/Git configuration that builds on it.
+
 ### Import your public key
 
 Pick one method:
