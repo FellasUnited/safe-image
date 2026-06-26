@@ -96,6 +96,14 @@ sudo cryptsetup close backup
 
 > **Remove the BACKUP USB now.**
 
+Set `KEYID` for the rest of this guide (the live image is amnesic, so it is
+unset on a fresh boot):
+
+```bash
+export KEYID=$(gpg --list-keys --with-colons | awk -F: '/^fpr/ { print $10; exit }')
+echo "$KEYID"   # should print your 40-char fingerprint
+```
+
 Set trust:
 
 ```bash
@@ -113,8 +121,8 @@ Follow [02-yubikey-setup.md](02-yubikey-setup.md):
 
 1. Enable KDF and change PINs (step 1) -- KDF must be turned on while the
    card is still empty, before `keytocard`
-2. Move subkeys to card with `keytocard` (step 3)
-3. Remove master key from the keyring (step 5)
+2. Move subkeys to card with `keytocard` (step 4)
+3. Remove master key from the keyring (step 8)
 
 ### 3. Export the updated public key
 
