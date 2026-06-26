@@ -127,12 +127,13 @@ sudo sed -i '1 a auth       required   pam_u2f.so' /etc/pam.d/login
 
 ### For screen unlock (GNOME)
 
-Edit `/etc/pam.d/gdm-fingerprint` (also used for GNOME screen
-unlock):
+No extra step. GNOME Shell's lock screen authenticates through the same
+`gdm-password` service you edited under **For GDM login** above, so that one
+edit already covers screen unlock.
 
-```bash
-sudo sed -i '1 a auth       required   pam_u2f.so' /etc/pam.d/gdm-fingerprint
-```
+> Do **not** add `pam_u2f.so` to `/etc/pam.d/gdm-fingerprint`. That stack is the
+> fingerprint (fprintd) path — GDM only consults it when a fingerprint is
+> enrolled, so it does nothing for a normal password unlock.
 
 ## 6. Test
 
