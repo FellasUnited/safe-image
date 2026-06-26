@@ -112,8 +112,8 @@ SPICE=1 make test-gui       # use spice-app + remote-viewer (clipboard on Fedora
 out/
 ├── safe-live-nixos-sway-<label>-x86_64-linux.iso      # live ISO
 ├── safe-live-nixos-sway-<label>-x86_64-linux.iso.asc  # GPG signature (after sign)
-├── SHA256SUMS                                          # checksums
-└── SHA256SUMS.asc                                      # checksum signature (after sign)
+├── SHA256SUMS                                         # checksums
+└── SHA256SUMS.asc                                     # checksum signature (after sign)
 ```
 
 The ISO is not committed to the repository. See [Reproducibility](#reproducibility).
@@ -268,7 +268,7 @@ invoke `gpg --card-edit > fetch`, which tries two paths in order:
 1. **Card URL** — set with `gpg --card-edit > admin > url`. Used if present.
 2. **Keyserver lookup by fingerprint** — fallback when no URL is on the card.
    Uses whichever keyserver is configured in `dirmngr.conf` (the live image
-   ships `keyserver hkp://keyserver.ubuntu.com:80`).
+   ships `keyserver hkps://keyserver.ubuntu.com:443`).
 
 URL-first is the right order: a URL you control (your own server, a
 GitHub raw URL, etc.) is more durable than a public keyserver that may

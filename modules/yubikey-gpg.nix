@@ -44,7 +44,10 @@
   environment.etc."gnupg/dirmngr.conf" = {
     mode = "0644";
     text = ''
-      keyserver hkp://keyserver.ubuntu.com:80
+      # hkps over :443 — TLS, traverses networks that block hkp/11371, and the
+      # explicit port makes dirmngr skip the SRV lookup that otherwise aborts
+      # keyserver ops. Matches lib/gpg-env.sh and the in-image guides.
+      keyserver hkps://keyserver.ubuntu.com:443
     '';
   };
 
